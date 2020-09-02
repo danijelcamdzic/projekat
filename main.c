@@ -20,29 +20,29 @@
 #include <math.h>
 
 /* Definitions of the sensor register addresses */
-#define AccelGyroAddress  		(0x69<<1)	 				/**< Sensor slave address of the accel+gyro */
-#define WHO_AM_I  						(0x75)						/**< WHO_AM_I register of the accel and gyro sensor */
-#define PWR_MGMT_1  					(0x6B)						/**< Register for power management */
+#define AccelGyroAddress  			(0x69<<1)	 				/**< Sensor slave address of the accel+gyro */
+#define WHO_AM_I  				(0x75)						/**< WHO_AM_I register of the accel and gyro sensor */
+#define PWR_MGMT_1  				(0x6B)						/**< Register for power management */
 #define ACCEL_XOUT_H  				(0x3B)						/**< Accelerometer X-axis high byte output */
-#define GYRO_XOUT_H  					(0x43)						/**< Gyroscope X-axis high byte output */
-#define INT_BYPASS_CONFIG_AD  (0x37)						/**< Register for switching accel+gyro to magnetometer slave */
+#define GYRO_XOUT_H  				(0x43)						/**< Gyroscope X-axis high byte output */
+#define INT_BYPASS_CONFIG_AD  			(0x37)						/**< Register for switching accel+gyro to magnetometer slave */
 
-#define MagnetometerAddress  	(0x0C<<1)					/**< Sensor slave address of the magnetometer */
-#define WIA										(0x00)						/**< Device ID address of the magnetometer */
-#define STATUS1								(0x02)						/**< Status1 register of the magnetometer slave */
-#define MAGN_XOUT_L  					(0x03)						/**< Magnetometer X-axis low byte output  */
-#define STATUS2								(0x09)						/**< Status2 register of the magnetometer slave */
-#define CNTL1_AD  						(0x0A)						/**< Control 1 register */
-#define ASAX_REG 							(0x10)						/**< X-axis sensitivity adjustment value register */
+#define MagnetometerAddress  			(0x0C<<1)					/**< Sensor slave address of the magnetometer */
+#define WIA					(0x00)						/**< Device ID address of the magnetometer */
+#define STATUS1					(0x02)						/**< Status1 register of the magnetometer slave */
+#define MAGN_XOUT_L  				(0x03)						/**< Magnetometer X-axis low byte output  */
+#define STATUS2					(0x09)						/**< Status2 register of the magnetometer slave */
+#define CNTL1_AD  				(0x0A)						/**< Control 1 register */
+#define ASAX_REG 				(0x10)						/**< X-axis sensitivity adjustment value register */
 
 #define ACCEL_GYRO_SLAVE			(0x00)						/**< Address to switch from magnetometer slave to accel+gyro slave */
-#define MAGNETOMETER_SLAVE		(0x02)						/**< Address to switch from accel+gyro slave to magnetometer slave */
+#define MAGNETOMETER_SLAVE			(0x02)						/**< Address to switch from accel+gyro slave to magnetometer slave */
 
-#define MagneticResolution		(4912/8190.0)			/**< Value necessary to find out the right magnetometer readings */
+#define MagneticResolution			(4912/8190.0)					/**< Value necessary to find out the right magnetometer readings */
 
-#define PI										(3.141592)				/**< Value of the mathematical constant PI */
+#define PI					(3.141592)					/**< Value of the mathematical constant PI */
 
-#define TurnToMilisecond			(0.5)							/**< Value used to turn counter readings to miliseconds */
+#define TurnToMilisecond			(0.5)						/**< Value used to turn counter readings to miliseconds */
 
 /* Type Definitions */
 struct KalmanFilter 
@@ -51,41 +51,41 @@ struct KalmanFilter
   float Q[2];				
 	float R;
 
-	float Xk[2];																	/**< State variables - position and velocity */
+	float Xk[2];										/**< State variables - position and velocity */
 	float P[2][2];
 	
-	float NoDriftGyroRate;												/**< Velocity from the gyroscopes adjusted for drift */
+	float NoDriftGyroRate;									/**< Velocity from the gyroscopes adjusted for drift */
 	
 } KalmanFilter; 
 
 /* Variables */
-struct KalmanFilter KalmanX;										/**< Kalman filter for X-axis */
-struct KalmanFilter KalmanY;										/**< Kalman filter for Y-axis */
-struct KalmanFilter KalmanZ;										/**< Kalman filter for Z-axis */
+struct KalmanFilter KalmanX;									/**< Kalman filter for X-axis */
+struct KalmanFilter KalmanY;									/**< Kalman filter for Y-axis */
+struct KalmanFilter KalmanZ;									/**< Kalman filter for Z-axis */
 
-uint8_t buf[12] = {0};													/**< Array used for sendind messages to UART */
-uint8_t data[8] = {0};													/**< Array used for sending data bytes */
+uint8_t buf[12] = {0};										/**< Array used for sendind messages to UART */
+uint8_t data[8] = {0};										/**< Array used for sending data bytes */
 
-int16_t X_AXIS = 0;															/**< Variable used to receive 2 bytes from the X-axis AccelZStartingments */
-int16_t Y_AXIS = 0;															/**< Variable used to receive 2 bytes from the Y-axis AccelZStartingments  */
-int16_t Z_AXIS = 0;															/**< Variable used to receive 2 bytes from the Z-axis AccelZStartingments  */
-float X_OUTPUT = 0.0;														/**< Final X-axis value */
-float Y_OUTPUT = 0.0;														/**< Final Y-axis value */
-float Z_OUTPUT = 0.0;														/**< Final Z-axis value */
+int16_t X_AXIS = 0;										/**< Variable used to receive 2 bytes from the X-axis AccelZStartingments */
+int16_t Y_AXIS = 0;										/**< Variable used to receive 2 bytes from the Y-axis AccelZStartingments  */
+int16_t Z_AXIS = 0;										/**< Variable used to receive 2 bytes from the Z-axis AccelZStartingments  */
+float X_OUTPUT = 0.0;										/**< Final X-axis value */
+float Y_OUTPUT = 0.0;										/**< Final Y-axis value */
+float Z_OUTPUT = 0.0;										/**< Final Z-axis value */
 
-uint8_t ASAX = 0;																/**< X-axis adjustment value for the magnetometer */
-uint8_t ASAY = 0;																/**< Y-axis adjustment value for the magnetometer */
-uint8_t ASAZ = 0;																/**< Z-axis adjustment value for the magnetometer */
+uint8_t ASAX = 0;										/**< X-axis adjustment value for the magnetometer */
+uint8_t ASAY = 0;										/**< Y-axis adjustment value for the magnetometer */
+uint8_t ASAZ = 0;										/**< Z-axis adjustment value for the magnetometer */
 
-float pitch = 0.0;															/**< Pitch value */
-float roll = 0.0;																/**< Roll value */
-float yaw = 0.0;																/**< Yaw value */
+float pitch = 0.0;										/**< Pitch value */
+float roll = 0.0;										/**< Roll value */
+float yaw = 0.0;										/**< Yaw value */
 
 float xaccel = 0.0;
 float yaccel = 0.0;
 float zaccel = 0.0;
 
-float MagneticOffset[3] = {-0.5, 3.0, -61.5};		/**< Magnetic offset for the magnetometer sensor. Calculated during one
+float MagneticOffset[3] = {-0.5, 3.0, -61.5};							/**< Magnetic offset for the magnetometer sensor. Calculated during one
 																								of the test runs from the function inside this project. */
 
 /* Function Definitions */
@@ -119,19 +119,19 @@ void SendToUART(uint8_t *pbuf);
  */
 void Clock_Init(void){
 	/* Use PLL as Clock Source and Mul by 12 */
-	RCC->CR &= ~(RCC_CR_PLLON);								/**< Turn off PLL */
+	RCC->CR &= ~(RCC_CR_PLLON);						/**< Turn off PLL */
 	while(RCC->CR & RCC_CR_PLLRDY);						/**< Wait until PLL is ready */
 	RCC->CFGR |= RCC_CFGR_PLLMUL12;						/**< Multiply PLL value by 12. Must not exceed 48 Mhz (Max frequency)! */
-	RCC->CR |= RCC_CR_PLLON;									/**< Turn on PLL */
-	while(!(RCC->CR & RCC_CR_PLLRDY));				/**< Wait until PLL is ready in order to avoid messing stuff up */
+	RCC->CR |= RCC_CR_PLLON;						/**< Turn on PLL */
+	while(!(RCC->CR & RCC_CR_PLLRDY));					/**< Wait until PLL is ready in order to avoid messing stuff up */
 	
 	FLASH->ACR |= FLASH_ACR_LATENCY;					/**< Add ONE wait state for the flash acces time because 24 Mhz <= SYSCLOCK <= 48MHz */
 	RCC->CFGR &= ~(RCC_CFGR_PPRE);						/**< Clear PCLK prescaler settings for safety */
 	RCC->CFGR |= RCC_CFGR_PPRE_DIV16;					/**< HCLK divided by 16 */
 	RCC->CFGR &= ~(RCC_CFGR_HPRE);						/**< Clear HCLK prescaler settings */
-	while(!(RCC->CR & RCC_CR_PLLRDY));				/**< Wait until PLL is ready */
-	RCC->CFGR &= ~(RCC_CFGR_SW);							/**< Clear System clcok switch settings */			
-	RCC->CFGR |= RCC_CFGR_SW_PLL;							/**< Select PLL as source */
+	while(!(RCC->CR & RCC_CR_PLLRDY));					/**< Wait until PLL is ready */
+	RCC->CFGR &= ~(RCC_CFGR_SW);						/**< Clear System clcok switch settings */			
+	RCC->CFGR |= RCC_CFGR_SW_PLL;						/**< Select PLL as source */
 	RCC->CFGR &= ~(RCC_CFGR_PPRE);						/**< Clear preslacer settings set before for safety */	
 }
 
@@ -148,7 +148,7 @@ void GPIO_Init(void) {
   RCC->AHBENR |= RCC_AHBENR_GPIOCEN;
   RCC->AHBENR |= RCC_AHBENR_GPIOFEN;
 
-	GPIOA->MODER |= GPIO_MODER_MODER5_0; 		/**< Output mode (01) for bit 5 */
+	GPIOA->MODER |= GPIO_MODER_MODER5_0; 					/**< Output mode (01) for bit 5 */
 }
 
 /**
@@ -160,13 +160,13 @@ void GPIO_Init(void) {
 void TIMER3_Init(void) {
 	/* Configuring Timer (TIM3) */
 	RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
-	TIM3->SR = 0;															/**< Resetting the SR register of TIM3 */
+	TIM3->SR = 0;								/**< Resetting the SR register of TIM3 */
 	TIM3->PSC = (uint16_t)(24000-1);					/**< SYSCLK/(PSC+1) = TIM3_frequency */
-	TIM3->ARR = (uint16_t)1999;								/**< Counts to 1999 and then goes to 0. */
+	TIM3->ARR = (uint16_t)1999;						/**< Counts to 1999 and then goes to 0. */
 	
 	/* In case I need interrupts */
 	//TIM3->DIER |= (1 << 0);
-	//NVIC_SetPriority(TIM3_IRQn, 2); 				/**< Priority level 2 */
+	//NVIC_SetPriority(TIM3_IRQn, 2); 					/**< Priority level 2 */
 	//NVIC_EnableIRQ(TIM3_IRQn);
 }
 
@@ -182,7 +182,7 @@ void USART2_Init(void) {
 	RCC->APB1ENR |= RCC_APB1ENR_USART2EN;																						/**< Enable clock for the USART2 */		
 	
 	GPIOA->AFR[0] |= (GPIO_AFRL_AFSEL2 & 0x100) | (GPIO_AFRL_AFSEL3 & 0x1000);	
-	GPIOA->MODER |= GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1; 											/**< Alternate function for pins 2 and 3 */ 
+	GPIOA->MODER |= GPIO_MODER_MODER2_1 | GPIO_MODER_MODER3_1; 		/**< Alternate function for pins 2 and 3 */ 
 	
 	USART2->CR1 &= ~(USART_CR1_UE);																									/**< Disable UART */ 
 	USART2->CR1 |= USART_CR1_TE | USART_CR1_RE;																			/**< Enable transmit and receive */ 
@@ -202,9 +202,9 @@ void I2C1_Init(void) {
 	RCC->AHBENR |= RCC_AHBENR_GPIOBEN;																							/**< Enable clock for the GPIOB (Pins for I2C1) */ 
 	
 	GPIOB->AFR[1] |= (GPIO_AFRH_AFSEL8 & 0x01) | (GPIO_AFRH_AFSEL9 & 0x10);					
-	GPIOB->MODER |= GPIO_MODER_MODER8_1 | GPIO_MODER_MODER9_1;											/**< Alternate function for the pins 8 and 9 */ 
+	GPIOB->MODER |= GPIO_MODER_MODER8_1 | GPIO_MODER_MODER9_1;										/**< Alternate function for the pins 8 and 9 */ 
 	GPIOB->OSPEEDR |= GPIO_OSPEEDR_OSPEEDR8_1 | (GPIO_OSPEEDR_OSPEEDR8_1 >> 1)| GPIO_OSPEEDER_OSPEEDR9_1 | (GPIO_OSPEEDR_OSPEEDR9_1 >> 1);	/**< High speed */ 
-	GPIOB->OTYPER |= GPIO_OTYPER_OT_8 | GPIO_OTYPER_OT_9;														/**< Open drain type */ 
+	GPIOB->OTYPER |= GPIO_OTYPER_OT_8 | GPIO_OTYPER_OT_9;											/**< Open drain type */ 
 	GPIOB->PUPDR |= GPIO_PUPDR_PUPDR8_0 | GPIO_PUPDR_PUPDR9_0;
 	
 	RCC->APB1ENR |= RCC_APB1ENR_I2C1EN;																							/**< Enable clock for I2C1 */ 
@@ -437,7 +437,7 @@ void GetMagnetometerAdjustment(void) {
 	
 	/* Starting the timer 3 peripheral and counting for 500 ms to change the mode of operation */
 	TIM3->CNT = 0x00;
-	TIM3->CR1 |= TIM_CR1_CEN;				/**< Enabling the timer 3 peripheral */					
+	TIM3->CR1 |= TIM_CR1_CEN;			/**< Enabling the timer 3 peripheral */					
 	while(1){
 		if(TIM3->CNT > 1000)
 			break;
@@ -526,7 +526,7 @@ void CalculateStartingAngle(void) {
 	float AccelYStarting = 0.0;
 	float AccelZStarting = 0.0;
 	
-	while (counter < 100)											/**< Read 100 times */	
+	while (counter < 100)				/**< Read 100 times */	
 	{
 		/* --------------------------------------- ACCELEROMETER ERROR --------------------------------------------- */
 		for(uint8_t i = 0; i < 6; i++) 
@@ -545,9 +545,9 @@ void CalculateStartingAngle(void) {
 	}
 	AccelXStarting = AccelXStarting/100.0;
 	AccelYStarting = AccelYStarting/100.0;
-	AccelZStarting = AccelZStarting/100.0;	/**< Don't want to count gravity as noise! */	
+	AccelZStarting = AccelZStarting/100.0;	
 	
-	float AccelAngleX = atan(AccelYStarting / sqrt(pow(AccelXStarting, 2) + pow(AccelZStarting, 2)))*180/PI;				/**< Roll y, z*/
+	float AccelAngleX = atan(AccelYStarting / sqrt(pow(AccelXStarting, 2) + pow(AccelZStarting, 2)))*180/PI;			/**< Roll y, z*/
 	float AccelAngleY = atan(-1*(AccelXStarting) / sqrt(pow(AccelYStarting, 2) + pow(AccelZStarting, 2)))*180/PI;			/**< Pitch x, z */
 	
 	roll = AccelAngleX;
@@ -626,8 +626,8 @@ void CalibrateMagnetometer(void) {
 	/* Turn on the LED to singify the start of the calibration */
 	GPIOA->ODR ^= GPIO_ODR_5;
 	
-	for(i = 0; i < calibration_count; i++) {				/**< Do 60000 AccelZStartingments */	
-    ReadMagnetometer(); 
+	for(i = 0; i < calibration_count; i++) {				/**< Do 60000 readings */	
+    		ReadMagnetometer(); 
 		
 		/* Find the appropriate values */
 		X_AXIS = (data[1] << 8) | data[0];
@@ -643,7 +643,7 @@ void CalibrateMagnetometer(void) {
 		Z_OUTPUT = ((float)(Z_AXIS))/4.0;
 
 		/* Finding the maximum and minimum of each axis */
-    if(X_OUTPUT > MAGX_MAX) 
+    		if(X_OUTPUT > MAGX_MAX) 
 			MAGX_MAX = X_OUTPUT;
 		if(X_OUTPUT < MAGX_MIN) 
 			MAGX_MIN = X_OUTPUT;
@@ -675,7 +675,7 @@ void CalibrateMagnetometer(void) {
 void SendToUART(uint8_t *pbuf) {
 		uint32_t size = strlen((char*) pbuf);
 		for (uint32_t i=0; i<size; i++){
-			USART2->TDR = pbuf[i];										/**< Send through the Transmit Data Register */	
+			USART2->TDR = pbuf[i];					/**< Send through the Transmit Data Register */	
 			while(!(USART2->ISR & USART_ISR_TC));			/**< Check transmission complete measure in order to continue */	
 		}
 }
@@ -757,7 +757,7 @@ int main(void)
 	TIM3->CR1 |= TIM_CR1_CEN;									/**< Writing TIM_CR1_CEN to CR1 register of the TIM3 enables the counting */
 	
 	
-	/*                                  --FOREVER LOOP--                                                     */
+	/*                                        --FOREVER LOOP--                                                     */
   while (1)
   {
 		/*                           --Reading the ACCELEROMETER--                                             */
@@ -780,7 +780,7 @@ int main(void)
 		/* Calculating the roll and pitch values from the accelerometer data */
 		//float AccelAngleY = atan2(X_OUTPUT, Z_OUTPUT)*180/PI;																				/**< Pitch */
 		//float AccelAngleX = atan2(Y_OUTPUT, Z_OUTPUT)*180/PI;																				/**< Roll */
-    float AccelAngleX = atan(Y_OUTPUT / sqrt(pow(X_OUTPUT, 2) + pow(Z_OUTPUT, 2)))*180/PI;				/**< Roll y, z*/
+    float AccelAngleX = atan(Y_OUTPUT / sqrt(pow(X_OUTPUT, 2) + pow(Z_OUTPUT, 2)))*180/PI;					/**< Roll y, z*/
 		float AccelAngleY = atan(-1*X_OUTPUT / sqrt(pow(Y_OUTPUT, 2) + pow(Z_OUTPUT, 2)))*180/PI;			/**< Pitch x, z */
 		
 		
@@ -883,6 +883,7 @@ int main(void)
 		//yaw = 0.81*GyroAngleZ + 0.19*yaw_tempf;					/**< Using the complementary filter with gyroscope data */
 		//yaw_tempf2 = 0.7*yaw_tempf2 + 0.3*yaw;
 		
+	  	/* Only if certain threshold is exceeded, mesure distance drawn */
 		if((xaccel*xaccel + yaccel*yaccel + zaccel*zaccel) > 1.25) {
 			GPIOA->ODR |= GPIO_ODR_5;
 			xdistance += xaccel*dt*dt;
