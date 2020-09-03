@@ -883,7 +883,7 @@ int main(void)
 		//yaw = 0.81*GyroAngleZ + 0.19*yaw_tempf;					/**< Using the complementary filter with gyroscope data */
 		//yaw_tempf2 = 0.7*yaw_tempf2 + 0.3*yaw;
 		
-	  	/* Only if certain threshold is exceeded, mesure distance drawn */
+	  	/* Only if certain threshold is exceeded, measure distance drawn */
 		if((xaccel*xaccel + yaccel*yaccel + zaccel*zaccel) > 1.25) {
 			GPIOA->ODR |= GPIO_ODR_5;
 			xdistance += xaccel*dt*dt;
@@ -900,6 +900,8 @@ int main(void)
 		/*                                    --VISUALIZATION--                                          */
 		/* Sending the data to be read inside the Processing Toolbox */
 		if(measure == 1) {
+			strcpy((char*)buf, "Letter,");
+			SendToUART(buf);
 			strcpy((char*)buf, "A,");
 			SendToUART(buf);
 			sprintf((char*)buf, "%f,", vrijeme);
